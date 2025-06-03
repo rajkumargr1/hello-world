@@ -1,0 +1,4 @@
+playsound==1.2.2
+# Add other dependencies here if any are introduced later.
+# For example, if a specific version of Pillow (PIL) was used for more complex image manipulation:
+# Pillow>=9.0.0

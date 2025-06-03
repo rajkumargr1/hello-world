@@ -1,0 +1,9 @@
+# This file ensures the 'assets' directory is tracked by Git.
+# Add your image and sound files here, e.g.:
+# duck_frame1.png
+# duck_frame2.png
+# duck_frame3.png
+# duck_frame4.png
+# correct_icon.png
+# quack.wav
+# correct.wav
