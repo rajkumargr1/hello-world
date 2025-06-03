@@ -11,7 +11,6 @@ try:
     PLAYSOUND_AVAILABLE = True
 except ImportError:
     PLAYSOUND_AVAILABLE = False
-    # print("playsound library not found. Sound effects will be disabled. Install with: pip install playsound")
 
 # Attempt to import calculator functions
 try:
@@ -24,6 +23,7 @@ except ImportError:
 # --- Color Palette ---
 COLOR_BG_ROOT = "#F0F8FF"
 COLOR_BG_FRAME = "#E6F3FF"
+# ... (rest of color palette remains the same)
 COLOR_TEXT_GENERAL = "#333333"
 COLOR_TEXT_RESULT = "#006400"
 COLOR_ACCENT_BUTTON = "#007ACC"
@@ -35,14 +35,21 @@ COLOR_FEEDBACK_CORRECT = "#28A745"
 COLOR_FEEDBACK_INCORRECT = "#DC3545"
 COLOR_PRACTICE_QUESTION = "#4B0082"
 
+
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
-DUCK_ANIMATION_FRAMES = 4 # Number of duck frames (duck_frame1.png to duck_frame4.png)
-DUCK_FRAME_DELAY_MS = 300 # Delay between duck animation frames
-FEEDBACK_CLEAR_DELAY_MS = 2000 # Delay to clear feedback canvas
+DUCK_ANIMATION_FRAMES = 4
+DUCK_FRAME_DELAY_MS = 300
+FEEDBACK_CLEAR_DELAY_MS = 2000
 
 class LCMLearningToolApp:
-    EXAMPLES: List[Tuple[int, ...]] = [(12, 18), (4, 6, 8), (15, 25, 30), (7, 5), (1, 8), (99, 88), (2, 3, 4, 5), (7, 14, 21, 28)]
-    PRACTICE_QUESTIONS: List[Tuple[Tuple[int, ...], int]] = [((4, 6), 12), ((15, 25), 75), ((8, 12), 24), ((7, 5), 35), ((10, 15, 20), 60), ((3, 5, 7), 105), ((2, 4, 8), 8), ((9, 6), 18)]
+    CALCULATOR_EXAMPLES: List[Tuple[int, ...]] = [ # Renamed from EXAMPLES
+        (12, 18), (4, 6, 8), (15, 25, 30), (7, 5), (1, 8),
+        (99, 88), (2, 3, 4, 5), (7, 14, 21, 28)
+    ]
+    PRACTICE_QUESTIONS: List[Tuple[Tuple[int, ...], int]] = [
+        ((4, 6), 12), ((15, 25), 75), ((8, 12), 24), ((7, 5), 35),
+        ((10, 15, 20), 60), ((3, 5, 7), 105), ((2, 4, 8), 8), ((9, 6), 18)
+    ]
 
     def __init__(self, root_window):
         self.root = root_window
@@ -56,13 +63,16 @@ class LCMLearningToolApp:
         self.style.theme_use('clam')
         self._configure_styles()
 
-        self.in_practice_mode = False
+        # --- State Variables ---
+        self.in_practice_mode = False # Will be set by tab change
         self.current_practice_question_numbers: Optional[Tuple[int, ...]] = None
         self.current_practice_correct_lcm: Optional[int] = None
-        self.current_question_index = -1
+        self.practice_question_index = -1 # Renamed from current_question_index
+        self.calculator_example_index = -1 # Renamed from current_example_index
         self.calculator_mode_active = True
-        self.duck_animation_job_id: Optional[str] = None # To cancel ongoing animation
+        self.duck_animation_job_id: Optional[str] = None
 
+        # --- StringVars ---
         self.numbers_input_var = tk.StringVar()
         self.lcm_result_var = tk.StringVar()
         self.practice_question_var = tk.StringVar()
@@ -80,51 +90,34 @@ class LCMLearningToolApp:
         self._create_calculator_ui(self.calculator_tab)
         self._create_practice_ui(self.practice_tab)
 
-        self.clear_fields()
-        self.handle_next_example()
+        self.clear_fields() # General clear
+        self.handle_calculator_next_example() # Load first calculator example
+        # Practice mode will load its first question when tab is selected or explicitly via _update_ui_for_mode
         self._update_ui_for_mode()
 
         if not PLAYSOUND_AVAILABLE:
             print("INFO: playsound library not found. Sound effects will be disabled. Install with: pip install playsound")
 
-
+    # ... (_load_assets, _configure_styles remain the same)
     def _load_assets(self):
         self.duck_frames: List[PhotoImage] = []
-        # Ensure there's at least one placeholder if all frames fail to load
-        default_placeholder = PhotoImage(width=100, height=100) # Create once
-
+        default_placeholder = PhotoImage(width=100, height=100)
         for i in range(1, DUCK_ANIMATION_FRAMES + 1):
             try:
                 image_path = os.path.join(ASSETS_DIR, f"duck_frame{i}.png")
-                if os.path.exists(image_path):
-                    self.duck_frames.append(PhotoImage(file=image_path))
-                else:
-                    # print(f"Warning: Duck image not found {image_path}. Using placeholder.")
-                    self.duck_frames.append(default_placeholder)
-            except tk.TclError as e:
-                # print(f"Error loading {image_path}: {e}. Using placeholder.")
-                self.duck_frames.append(default_placeholder)
-
-        if not self.duck_frames : # If loop didn't run or all failed
-             self.duck_frames.append(default_placeholder)
-
-
+                if os.path.exists(image_path): self.duck_frames.append(PhotoImage(file=image_path))
+                else: self.duck_frames.append(default_placeholder)
+            except tk.TclError: self.duck_frames.append(default_placeholder)
+        if not self.duck_frames: self.duck_frames.append(default_placeholder)
         try:
             correct_image_path = os.path.join(ASSETS_DIR, "correct_icon.png")
-            if os.path.exists(correct_image_path):
-                self.correct_image = PhotoImage(file=correct_image_path)
-            else:
-                # print(f"Warning: Correct icon not found {correct_image_path}. Using placeholder.")
-                self.correct_image = default_placeholder
-        except tk.TclError as e:
-            # print(f"Error loading correct_icon.png: {e}. Using placeholder.")
-            self.correct_image = default_placeholder
-
+            if os.path.exists(correct_image_path): self.correct_image = PhotoImage(file=correct_image_path)
+            else: self.correct_image = default_placeholder
+        except tk.TclError: self.correct_image = default_placeholder
         self.quack_sound_path = os.path.join(ASSETS_DIR, "quack.wav")
         self.correct_sound_path = os.path.join(ASSETS_DIR, "correct.wav")
 
-
-    def _configure_styles(self): # ... (same as before)
+    def _configure_styles(self):
         self.style.configure("TLabel", background=COLOR_BG_FRAME, foreground=COLOR_TEXT_GENERAL, padding=3)
         self.style.configure("TEntry", fieldbackground="white", foreground=COLOR_TEXT_GENERAL)
         self.style.configure("TButton", foreground=COLOR_TEXT_GENERAL, padding=5)
@@ -137,7 +130,10 @@ class LCMLearningToolApp:
         self.style.configure("TNotebook.Tab", background=COLOR_BG_FRAME, foreground=COLOR_TEXT_HEADING, padding=[8,3])
         self.style.map("TNotebook.Tab", background=[("selected", COLOR_ACCENT_BUTTON)], foreground=[("selected", "white")])
 
-    def _create_calculator_ui(self, parent_frame): # ... (same as before)
+
+    def _create_calculator_ui(self, parent_frame):
+        # ... (UI elements like input_frame, factors_display_frame, lcm_steps_frame, result_frame) ...
+        # Buttons Section (Calculator)
         input_frame = ttk.LabelFrame(parent_frame, text="Inputs", padding="10")
         input_frame.pack(fill=tk.X, pady=10, padx=5)
         input_frame.columnconfigure(1, weight=1)
@@ -181,78 +177,82 @@ class LCMLearningToolApp:
         calc_buttons_frame.pack(fill=tk.X, side=tk.BOTTOM)
         self.calculate_button = ttk.Button(calc_buttons_frame, text="Calculate LCM", command=self.handle_calculate_lcm, style="Accent.TButton")
         self.calculate_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.next_example_button = ttk.Button(calc_buttons_frame, text="Next Example", command=self.handle_next_example)
-        self.next_example_button.pack(side=tk.LEFT, padx=5, pady=5)
+        # Ensure this button calls the correctly named handler
+        self.calculator_next_example_button = ttk.Button(calc_buttons_frame, text="Next Example", command=self.handle_calculator_next_example)
+        self.calculator_next_example_button.pack(side=tk.LEFT, padx=5, pady=5)
         self.clear_calc_button = ttk.Button(calc_buttons_frame, text="Clear", command=self.clear_fields)
         self.clear_calc_button.pack(side=tk.LEFT, padx=5, pady=5)
         self.help_button_calc = ttk.Button(calc_buttons_frame, text="Help/Info", command=self.show_help)
         self.help_button_calc.pack(side=tk.RIGHT, padx=5, pady=5)
 
-    def _create_practice_ui(self, parent_frame): # ... (canvas renamed to self.feedback_canvas)
+    def _create_practice_ui(self, parent_frame): # ... (same as before)
         question_frame = ttk.LabelFrame(parent_frame, text="Practice Question", padding="10")
         question_frame.pack(fill=tk.X, pady=10, padx=5, expand=False)
         self.practice_question_label = ttk.Label(question_frame, textvariable=self.practice_question_var, font=("Arial", 12, "bold"), foreground=COLOR_PRACTICE_QUESTION, wraplength=700)
         self.practice_question_label.pack(pady=10)
-
         answer_frame = ttk.LabelFrame(parent_frame, text="Your Answer", padding="10")
         answer_frame.pack(fill=tk.X, pady=10, padx=5, expand=False)
         self.practice_answer_entry = ttk.Entry(answer_frame, textvariable=self.practice_answer_var, font=('TkDefaultFont', 11), width=20)
         self.practice_answer_entry.pack(pady=5)
         self.practice_answer_entry.bind("<Return>", lambda event: self.handle_submit_answer())
-
         self.feedback_canvas = tk.Canvas(parent_frame, width=120, height=120, bg=COLOR_BG_FRAME, highlightthickness=0)
         self.feedback_canvas.pack(pady=10)
-
         feedback_frame = ttk.LabelFrame(parent_frame, text="Feedback", padding="10")
         feedback_frame.pack(fill=tk.X, pady=10, padx=5, expand=False)
         self.practice_feedback_label = ttk.Label(feedback_frame, textvariable=self.practice_feedback_var, font=("Arial", 11, "italic"), wraplength=700)
         self.practice_feedback_label.pack(pady=5)
-
         practice_buttons_frame = ttk.Frame(parent_frame, padding="10 5 0 5", style="Main.TFrame")
         practice_buttons_frame.pack(fill=tk.X, side=tk.BOTTOM)
         self.submit_answer_button = ttk.Button(practice_buttons_frame, text="Submit Answer", command=self.handle_submit_answer, style="Accent.TButton")
         self.submit_answer_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.next_question_button = ttk.Button(practice_buttons_frame, text="Next Question", command=self.load_next_practice_question)
+        self.next_question_button = ttk.Button(practice_buttons_frame, text="Next Question", command=self.load_next_practice_question) # Corrected command name
         self.next_question_button.pack(side=tk.LEFT, padx=5, pady=5)
         self.help_button_practice = ttk.Button(practice_buttons_frame, text="Help/Info", command=self.show_help)
         self.help_button_practice.pack(side=tk.RIGHT, padx=5, pady=5)
 
-    def _on_tab_change(self, event): # ... (same)
+
+    def _on_tab_change(self, event):
         selected_tab_index = self.notebook.index(self.notebook.select())
         if selected_tab_index == 0:
             self.in_practice_mode = False; self.calculator_mode_active = True
         elif selected_tab_index == 1:
             self.in_practice_mode = True; self.calculator_mode_active = False
-            if not self.current_practice_question_numbers: self.start_practice_session()
+            # Load first practice question ONLY if none has been loaded yet in this session
+            if self.practice_question_index == -1 or not self.current_practice_question_numbers:
+                self.start_practice_session()
         self._update_ui_for_mode()
 
-    def _update_ui_for_mode(self): # ... (same)
+    def _update_ui_for_mode(self):
         if self.in_practice_mode:
             self.practice_answer_entry.focus()
-            if not self.current_practice_question_numbers: self.load_next_practice_question()
-        else: self.numbers_entry.focus()
+            # If practice mode is active but no question is loaded (e.g. app just started and switched to tab)
+            if self.practice_question_index == -1 or not self.current_practice_question_numbers:
+                 self.load_next_practice_question()
+        else:
+            if hasattr(self, 'numbers_entry'): # Ensure UI element exists
+                 self.numbers_entry.focus()
+            # If calculator mode is active but no example loaded (e.g. app just started)
+            if self.calculator_example_index == -1 and hasattr(self, 'numbers_input_var') and not self.numbers_input_var.get():
+                self.handle_calculator_next_example()
 
-    def start_practice_session(self): # ... (same)
-        self.current_question_index = -1
+
+    def start_practice_session(self):
+        self.practice_question_index = -1 # Reset index before loading first question
         self.load_next_practice_question()
 
-    def _clear_feedback_canvas(self):
-        if hasattr(self, 'feedback_canvas'):
-            self.feedback_canvas.delete("all")
-        if self.duck_animation_job_id:
-            self.root.after_cancel(self.duck_animation_job_id)
-            self.duck_animation_job_id = None
+    def _clear_feedback_canvas(self): # ... (same as before)
+        if hasattr(self, 'feedback_canvas'): self.feedback_canvas.delete("all")
+        if self.duck_animation_job_id: self.root.after_cancel(self.duck_animation_job_id); self.duck_animation_job_id = None
 
-    def load_next_practice_question(self):
-        self._clear_feedback_canvas() # Clear canvas for new question
+    def load_next_practice_question(self): # Uses self.practice_question_index
+        self._clear_feedback_canvas()
         if not self.PRACTICE_QUESTIONS:
             self.practice_question_var.set("No practice questions available.")
             self.submit_answer_button.config(state=tk.DISABLED)
             self.next_question_button.config(state=tk.DISABLED)
             return
-
-        self.current_question_index = (self.current_question_index + 1) % len(self.PRACTICE_QUESTIONS)
-        q_data = self.PRACTICE_QUESTIONS[self.current_question_index]
+        self.practice_question_index = (self.practice_question_index + 1) % len(self.PRACTICE_QUESTIONS)
+        q_data = self.PRACTICE_QUESTIONS[self.practice_question_index]
         self.current_practice_question_numbers = q_data[0]
         self.current_practice_correct_lcm = q_data[1]
         numbers_str = ", ".join(map(str, self.current_practice_question_numbers))
@@ -262,33 +262,22 @@ class LCMLearningToolApp:
         self.practice_feedback_label.configure(foreground=COLOR_TEXT_GENERAL)
         self.submit_answer_button.config(state=tk.NORMAL)
         self.practice_answer_entry.focus()
-
-        # Display initial duck frame (frame 0)
         if self.duck_frames and len(self.duck_frames) > 0:
              self.feedback_canvas.create_image(60, 60, image=self.duck_frames[0], tags="duck_image", anchor="center")
 
-
-    def _animate_duck(self, frame_index=0):
-        self._clear_feedback_canvas() # Clear previous frame/icon
-
+    def _animate_duck(self, frame_index=0): # ... (same as before)
+        self._clear_feedback_canvas()
         if frame_index < len(self.duck_frames):
             current_frame_image = self.duck_frames[frame_index]
             self.feedback_canvas.create_image(60, 60, image=current_frame_image, anchor="center", tags="duck_image")
-
-            # Play quack sound on specific frames (e.g., frame 1 or 2)
             if PLAYSOUND_AVAILABLE and os.path.exists(self.quack_sound_path) and frame_index in [1, 2]:
-                try:
-                    playsound(self.quack_sound_path, block=False)
-                except Exception as e:
-                    print(f"Error playing quack sound: {e}")
-
+                try: playsound(self.quack_sound_path, block=False)
+                except Exception as e: print(f"Error playing quack sound: {e}")
             self.duck_animation_job_id = self.root.after(DUCK_FRAME_DELAY_MS, lambda: self._animate_duck(frame_index + 1))
         else:
-            # Animation finished, optionally keep last frame or clear after a delay
             self.duck_animation_job_id = self.root.after(FEEDBACK_CLEAR_DELAY_MS - (DUCK_ANIMATION_FRAMES * DUCK_FRAME_DELAY_MS), self._clear_feedback_canvas)
 
-
-    def handle_submit_answer(self): # ... (same validation logic)
+    def handle_submit_answer(self): # ... (same as before)
         if not self.current_practice_question_numbers or self.current_practice_correct_lcm is None:
             messagebox.showwarning("No Question", "Please load a question first.", parent=self.root); return
         try:
@@ -296,35 +285,26 @@ class LCMLearningToolApp:
             if not student_answer_str.strip(): messagebox.showwarning("Input Required", "Please enter an answer.", parent=self.root); return
             student_answer = int(student_answer_str)
         except ValueError: messagebox.showerror("Invalid Input", "Please enter a valid number.", parent=self.root); self.practice_answer_var.set(""); return
-
-        self._clear_feedback_canvas() # Clear previous animation/icon before new feedback
-
+        self._clear_feedback_canvas()
         if student_answer == self.current_practice_correct_lcm: self.trigger_correct_answer_feedback()
         else: self.trigger_incorrect_answer_feedback(self.current_practice_correct_lcm)
         self.submit_answer_button.config(state=tk.DISABLED)
 
-
-    def trigger_correct_answer_feedback(self):
+    def trigger_correct_answer_feedback(self): # ... (same as before)
         self.practice_feedback_var.set("Correct! Well done. Click 'Next Question'.")
         self.practice_feedback_label.configure(foreground=COLOR_FEEDBACK_CORRECT)
-
-        if hasattr(self, 'correct_image') and self.correct_image:
-            self.feedback_canvas.create_image(60, 60, image=self.correct_image, anchor="center")
-
+        if hasattr(self, 'correct_image') and self.correct_image: self.feedback_canvas.create_image(60, 60, image=self.correct_image, anchor="center")
         if PLAYSOUND_AVAILABLE and os.path.exists(self.correct_sound_path):
             try: playsound(self.correct_sound_path, block=False)
             except Exception as e: print(f"Error playing correct sound: {e}")
-
         self.root.after(FEEDBACK_CLEAR_DELAY_MS, self._clear_feedback_canvas)
 
-
-    def trigger_incorrect_answer_feedback(self, correct_answer: int):
+    def trigger_incorrect_answer_feedback(self, correct_answer: int): # ... (same as before)
         self.practice_feedback_var.set(f"Incorrect. The correct LCM is {correct_answer}. Try the next question.")
         self.practice_feedback_label.configure(foreground=COLOR_FEEDBACK_INCORRECT)
-        self._animate_duck(0) # Start duck animation from frame 0
+        self._animate_duck(0)
 
-
-    # --- Calculator Mode Methods (largely unchanged) ---
+    # --- Calculator Mode Methods ---
     def _update_text_widget_formatted(self, text_widget: tk.Text, content_list: List[List[Tuple[str, List[str]]]]): # ... (same)
         text_widget.config(state=tk.NORMAL); text_widget.delete("1.0", tk.END)
         for line_content in content_list:
@@ -354,7 +334,8 @@ class LCMLearningToolApp:
         help_text = "Prime Numbers: Divisible by 1 and self (e.g., 2, 3, 5).\nPrime Factorization: Breaking a number into prime multiples (e.g., 12 = 2^2 * 3).\nLCM: Smallest number divisible by all given numbers.\nCalculated via highest powers of all prime factors involved."
         messagebox.showinfo("Help/Info - LCM Learning Tool", help_text, parent=self.root)
 
-    def handle_calculate_lcm(self): # ... (same calculator logic)
+    def handle_calculate_lcm(self): # Calculator tab's main calculation function
+        # ... (calculator logic from previous step, ensure parent=self.root for messageboxes)
         input_str = self.numbers_input_var.get()
         if not input_str.strip(): messagebox.showerror("Input Error", "Please enter at least one number.", parent=self.root); return
         num_str_parts = input_str.split(','); numbers_list: List[int] = []; parsed_input_parts: List[str] = []
@@ -397,24 +378,32 @@ class LCMLearningToolApp:
         except ValueError as e: messagebox.showerror("Calculation Error", str(e), parent=self.root); self.clear_fields_output_calc()
         except Exception as e: messagebox.showerror("Error", f"An unexpected error: {e}", parent=self.root); self.clear_fields_output_calc()
 
-    def clear_fields_output_calc(self): # ... (same)
+
+    def clear_fields_output_calc(self): # For calculator tab
         self._update_text_widget_simple(self.factors_text, [("Factorizations will appear here.", ["italic"])])
         self._update_text_widget_simple(self.lcm_steps_text, [("Calculation steps will appear here.", ["italic"])])
         self.lcm_result_var.set("-")
 
-    def clear_fields(self): # ... (Updated to include feedback_canvas clearing)
+    def clear_fields(self): # General clear, called on init
+        # Calculator fields
         self.numbers_input_var.set("")
-        self.clear_fields_output_calc()
+        if hasattr(self, 'factors_text') and hasattr(self, 'lcm_steps_text') and hasattr(self, 'lcm_result_var'): # Check if UI created
+            self.clear_fields_output_calc()
         if hasattr(self, 'numbers_entry'): self.numbers_entry.focus()
+
+        # Practice fields
         if hasattr(self, 'practice_answer_var'): self.practice_answer_var.set("")
-        if hasattr(self, 'practice_feedback_var'): self.practice_feedback_var.set("Select a tab to start.")
+        if hasattr(self, 'practice_feedback_var'): self.practice_feedback_var.set("Select a tab to start or load a question.")
         if hasattr(self, 'practice_question_var'): self.practice_question_var.set("Switch to 'Practice Mode' tab for questions.")
         self._clear_feedback_canvas()
 
 
-    def handle_next_example(self): # ... (same)
-        self.current_example_index = (self.current_example_index + 1) % len(self.EXAMPLES)
-        current_example_nums = self.EXAMPLES[self.current_example_index]
+    def handle_calculator_next_example(self): # Renamed from handle_next_example
+        if not self.CALCULATOR_EXAMPLES:
+            messagebox.showinfo("Info", "No calculator examples loaded.", parent=self.root)
+            return
+        self.calculator_example_index = (self.calculator_example_index + 1) % len(self.CALCULATOR_EXAMPLES)
+        current_example_nums = self.CALCULATOR_EXAMPLES[self.calculator_example_index]
         self.numbers_input_var.set(", ".join(map(str, current_example_nums)))
         self.handle_calculate_lcm()
 
