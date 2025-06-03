@@ -1,14 +1,16 @@
 # LCM Learning Tool
 
-A simple desktop application built with Python and Tkinter to help understand and calculate the Least Common Multiple (LCM) using prime factorization.
+A simple desktop application built with Python and Tkinter to help understand and calculate the Least Common Multiple (LCM) using prime factorization for multiple numbers.
 
 ## Features
 
-*   Calculates LCM for two positive integers.
+*   Accepts multiple numbers (comma-separated) as input for LCM calculation.
+*   Calculates LCM for the set of provided positive integers.
 *   Displays the prime factorization for each input number.
-*   Provides a step-by-step explanation of how the LCM is derived from the prime factorizations.
-*   Includes "Next Example" functionality to quickly load and see solutions for predefined number pairs.
+*   Provides a step-by-step explanation of how the LCM is derived from the prime factorizations of all numbers.
+*   Includes "Next Example" functionality to quickly load and see solutions for predefined sets of numbers.
 *   Basic help section explaining prime numbers, factorization, and LCM.
+*   Colorful and visually organized interface to improve readability and user experience. The application features a visually enhanced interface with color-coded elements for better understanding of the LCM process.
 
 ## Running the Application
 
@@ -32,6 +34,9 @@ This method requires you to have Python 3 installed on your system.
     ```
     This will launch the LCM Learning Tool GUI.
 
+5.  **Usage:**
+    In the input field labeled "Enter numbers (comma-separated):", type the numbers you want to find the LCM for, separated by commas (e.g., `12, 18, 20` or `7, 5, 10, 14`). Then click "Calculate LCM".
+
 ### Method 2: Creating a standalone executable (using PyInstaller)
 
 This method packages the application into a single executable file that can be run on systems without Python installed (though it bundles a Python interpreter).
@@ -50,6 +55,7 @@ This method packages the application into a single executable file that can be r
     *   `--onefile`: Bundles everything into a single executable file.
     *   `--windowed`: Prevents a command line console window from appearing when the GUI application runs (especially relevant on Windows).
     *   `--name LCM_Calculator`: Sets the name of the output executable file to `LCM_Calculator.exe` (on Windows) or `LCM_Calculator` (on macOS/Linux).
+    *   You might need to add `--add-data "calculator.py:."` or ensure PyInstaller picks up `calculator.py` if it's not automatically found, though for simple same-directory imports it usually works. If you encounter `ModuleNotFoundError` for `calculator` when running the executable, this is an area to investigate.
 5.  **Find the executable.**
     After PyInstaller finishes, you will find the standalone executable in a subdirectory named `dist`. For example, `lcm_app/dist/LCM_Calculator`.
 
