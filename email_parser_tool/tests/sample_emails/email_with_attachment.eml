@@ -1,0 +1,19 @@
+Subject: Email with Attachment
+From: sender@example.com
+To: recipient@example.com
+Date: Wed, 03 Jan 2023 12:00:00 +0000
+Content-Type: multipart/mixed; boundary="boundary_string"
+
+--boundary_string
+Content-Type: text/plain; charset="utf-8"
+
+Please find the attached document.
+
+--boundary_string
+Content-Type: text/plain; name="test_attachment.txt"
+Content-Disposition: attachment; filename="test_attachment.txt"
+Content-Transfer-Encoding: base64
+
+SGVsbG8sIFdvcmxkIQ==
+
+--boundary_string--

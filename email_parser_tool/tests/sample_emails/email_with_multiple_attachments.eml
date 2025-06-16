@@ -1,0 +1,26 @@
+Subject: Email with Multiple Attachments
+From: sender@example.com
+To: recipient@example.com
+Date: Thu, 04 Jan 2023 13:00:00 +0000
+Content-Type: multipart/mixed; boundary="boundary_string"
+
+--boundary_string
+Content-Type: text/plain; charset="utf-8"
+
+This email has two attachments.
+
+--boundary_string
+Content-Type: text/plain; name="file1.txt"
+Content-Disposition: attachment; filename="file1.txt"
+Content-Transfer-Encoding: base64
+
+RmlsZSAxIENvbnRlbnQ=
+
+--boundary_string
+Content-Type: application/octet-stream; name="file2.dat"
+Content-Disposition: attachment; filename="file2.dat"
+Content-Transfer-Encoding: base64
+
+RmlsZSAyIENvbnRlbnQ=
+
+--boundary_string--

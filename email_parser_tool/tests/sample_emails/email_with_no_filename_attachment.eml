@@ -1,0 +1,19 @@
+Subject: Email with No-Filename Attachment
+From: sender@example.com
+To: recipient@example.com
+Date: Mon, 08 Jan 2023 17:00:00 +0000
+Content-Type: multipart/mixed; boundary="boundary_string"
+
+--boundary_string
+Content-Type: text/plain; charset="utf-8"
+
+Attachment with no filename specified in Content-Disposition.
+
+--boundary_string
+Content-Type: text/plain
+Content-Disposition: attachment
+Content-Transfer-Encoding: base64
+
+Tm9OYW1lQXR0YWNobWVudA==
+
+--boundary_string--

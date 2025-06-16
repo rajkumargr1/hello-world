@@ -1,0 +1,4 @@
+Subject: Test Email for Logging
+
+Body:
+This is the plain text body for the logging test.

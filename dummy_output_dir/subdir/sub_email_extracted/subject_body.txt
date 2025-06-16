@@ -1,0 +1,4 @@
+Subject: SubDir Logging Email
+
+Body:
+Simple body for logging.

@@ -1,0 +1,20 @@
+Subject: Test Email for Logging
+From: logger@example.com
+To: recipient@example.com
+Date: Wed, 19 Jun 2024 10:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="boundary_string_log_test"
+
+--boundary_string_log_test
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+This is the plain text body for the logging test.
+
+--boundary_string_log_test
+Content-Type: application/octet-stream; name="log_attachment.txt"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="log_attachment.txt"
+
+TG9nIHRlc3QgYXR0YWNobWVudCBjb250ZW50Lg==
+--boundary_string_log_test--

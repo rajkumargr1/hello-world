@@ -1,0 +1,6 @@
+Subject: Email in SubDir
+From: sub@example.com
+To: main@example.com
+Date: Tue, 18 Jun 2024 11:00:00 +0000
+
+This is a very simple email body with no attachments.

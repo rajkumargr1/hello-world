@@ -1,0 +1,4 @@
+Subject: Email in SubDir
+
+Body:
+This is a very simple email body with no attachments.

@@ -1,0 +1,7 @@
+Subject: Test! Subject with "Quotes" and <Special> Chars: &
+From: sender@example.com
+To: recipient@example.com
+Date: Fri, 05 Jan 2023 14:00:00 +0000
+Content-Type: text/plain; charset="utf-8"
+
+Body of email with special characters in subject.
