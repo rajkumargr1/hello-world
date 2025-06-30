@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets and sensitive configuration
+config/secrets.yaml
+*.env
+credentials.json
+*.pem
+
+# Data files & temporary files
+data/temp_attachments/
+data/automation/
+data/*.csv # If output CSV shouldn't be committed, otherwise remove this line
+*.log
+
+# OS specific
+.DS_Store
+Thumbs.db

@@ -1,0 +1,21 @@
+# Python dependencies for the Email Processing Project
+
+# Email processing
+imapclient
+python-dotenv # For managing environment variables (e.g., for credentials)
+
+# File handling
+openpyxl # For Excel file reading (xlsx)
+xlrd # For older Excel file reading (xls)
+python-magic # For identifying file types (optional, but good for attachments)
+pypdf2 # For PDF processing (or use 'pdfplumber' or 'pymupdf' for more advanced needs)
+
+# LLM interaction (example, replace with actual Gemini SDK if available or use 'requests')
+google-generativeai
+requests # Generic HTTP requests, useful for LLM APIs
+
+# Configuration file parsing
+pyyaml
+
+# Data handling
+pandas # For data manipulation and CSV output (though standard 'csv' module is also fine for simpler cases)

@@ -1,0 +1,42 @@
+# Configuration file for the Email Processing Project
+
+# Email server configuration (IMAP)
+email_server:
+  host: "imap.example.com"
+  port: 993
+  user: "your_email@example.com"
+  # For password, prefer using environment variables or a secrets management tool
+  # password_env_var: "EMAIL_PASSWORD" # Example: name of environment variable
+  # Or, if you must store it here (not recommended for production):
+  # password: "your_password"
+
+# LLM Configuration (Generic)
+llm:
+  # provider: "gemini" # Example: gemini, openai, etc.
+  api_key_env_var: "LLM_API_KEY" # Name of environment variable for the API key
+  # Or, if you must store it here (not recommended for production):
+  # api_key: "your_llm_api_key"
+  # endpoint: "https://api.example-llm.com/v1/chat" # Example endpoint
+  model: "gemini-pro" # Default model to use
+
+# Email processing settings
+processing:
+  # List of sender email addresses whose Excel attachments are considered standard templates
+  # and should be moved to the 'automation' folder.
+  standard_template_senders:
+    - "reports@company.com"
+    - "automation_sender@example.com"
+
+  # Output CSV file path
+  output_csv_file: "data/equipment_moves.csv"
+
+  # Temporary directory for storing email attachments during processing
+  temp_attachment_dir: "data/temp_attachments"
+
+  # Folder for standard template Excel files
+  automation_folder: "data/automation"
+
+# Logging configuration (optional, can be expanded)
+logging:
+  level: "INFO" # e.g., DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(levelname)s - %(module)s - %(message)s"
