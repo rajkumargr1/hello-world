@@ -1,0 +1,6 @@
+EquipmentID,EquipmentType,EquipmentSize,EquipmentStatus,CurrentLocation,Customer,LastMovementDate,TareWeight,ManufactureDate,MethodOfShipment,MeansOfConveyanceAuth,FreightCarrierConsolidator
+CNTR001,20GP,20,Available,NYC01,CustA,2023-01-10,2200,2010-05-01,Sea,VESSEL001,CarrierX
+CNTR002,40HC,40,In Use,LAX02,CustB,2023-01-15,3800,2015-08-12,Rail,TRAIN005,CarrierY
+CNTR003,20RF,20,Maintenance,NYC01,,2023-01-05,2500,2012-01-20,Sea,VESSEL002,CarrierX
+CNTR004,40GP,40,Available,SFO03,CustC,2023-01-20,3700,2018-11-30,Road,TRUCK77,CarrierZ
+CNTR005,20OT,20,In Use,LAX02,CustA,2023-01-12,2300,2011-06-15,Sea,BARGE03,CarrierY
